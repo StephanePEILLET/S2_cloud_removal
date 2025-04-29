@@ -9,26 +9,11 @@ all:
 
 docker_build:
 	docker build \
+		--build-arg env_name=${ENV_NAME} \
 		--build-arg http_proxy=${HTTP_PROXY} \
 		--build-arg https_proxy=${HTTPS_PROXY} \
 		--build-arg no_proxy=${NO_PROXY} \
 		-t ${IMAGE_NAME}:${IMAGE_TAG} --rm .
-
-docker_test:
-	docker build \
-		--build-arg http_proxy=${HTTP_PROXY} \
-		--build-arg https_proxy=${HTTPS_PROXY} \
-		--build-arg no_proxy=${NO_PROXY} \
-		-f test.dockerfile \
-		-t ${IMAGE_NAME}:test --rm .
-
-docker_run_test:
-	docker run --gpus all --ipc host --rm \
-		-v ${PATH_DATA}:/data \
-		-v ${OUTPUT_FOLDER}:/output \
-		-v ${CODE_REPO}:/app \
-		-v ${CSV_FOLDER}:/csvs \
-		${IMAGE_NAME}:test --conf_folder "./configs/debug_docker"
 
 docker_run:
 	docker run --gpus all --ipc host --rm \
@@ -37,10 +22,6 @@ docker_run:
 		-v ${CODE_REPO}:/app \
 		-v ${CSV_FOLDER}:/csvs \
 		${IMAGE_NAME}:${IMAGE_TAG} --conf_folder "./configs/debug_docker"
-    # si variable d'environnement
-    # -e HF_HUB_CACHE=$WORK/HF-MODELS-PRETRAINED \
-    # -e HF_DATASETS_OFFLINE=1 \  
-    # -e TRANSFORMERS_OFFLINE=1 \
 
 docker_push:
 	docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${USER_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
@@ -50,14 +31,11 @@ docker_clean:
 	docker image rmi ${IMAGE_NAME}:${IMAGE_TAG}
 
 singularity_build_from_docker:
-	singularity build --fakeroot ${IMAGE_NAME}_${IMAGE_TAG}.sif flairhub.def  
+	export ENV_NAME=${ENV_NAME} && singularity build --fakeroot ${IMAGE_NAME}_${IMAGE_TAG}.sif change_entrypoint.def  
 #singularity build --fakeroot --disable-cache ${IMAGE_NAME}_${IMAGE_TAG}.sif docker-daemon://${IMAGE_NAME}:${IMAGE_TAG} # cas sans rééciture de l'entrypoint
 
 singularity_build_from_dockerhub:
 	singularity build --fakeroot --no-https --no-cleanup ${IMAGE_NAME}_${IMAGE_TAG}.sif docker://${USER_NAME}/${IMAGE_NAME}:${IMAGE_TAG}
-
-singularity_build:
-	singularity build --fakeroot ${IMAGE_NAME}_${IMAGE_TAG}.sif flairhub_singularity.def
 
 singularity_run:
 	singularity exec --nv --fakeroot\
@@ -66,7 +44,7 @@ singularity_run:
 		--bind ${CODE_REPO}:/app \
 		--bind ${CSV_FOLDER}:/csvs \
 		${IMAGE_NAME}_${IMAGE_TAG}.sif \
-		mamba run -n flairhub python /app/src/flair_inc/main.py --conf_folder /app/configs/debug_docker
+		mamba run -n ${ENV_NAME} python /app/src/main.py --conf_folder /app/configs/debug_docker
 
 singularity_shell:
 	singularity exec --nv --fakeroot\
@@ -75,7 +53,7 @@ singularity_shell:
 		--bind ${CODE_REPO}:/app \
 		--bind ${CSV_FOLDER}:/csvs \
 		${IMAGE_NAME}_${IMAGE_TAG}.sif \
-		mamba run -n flairhub fish
+		mamba run -n ${ENV_NAME} fish
 
 singularity_clean:
 	singularity cache clean

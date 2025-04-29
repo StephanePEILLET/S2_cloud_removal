@@ -1,7 +1,0 @@
-Bootstrap: docker-daemon
-From: flairhub:v1.0
-Stage: build
-
-%runscript
-    exec conda init bash
-    exec conda run -n flairhub python /app/src/flair_inc/main.py "$@"

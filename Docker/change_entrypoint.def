@@ -1,0 +1,7 @@
+Bootstrap: docker-daemon
+From: ${ENV_NAME}:v1.0
+Stage: build
+
+%runscript
+    exec conda init bash
+    exec conda run -n ${ENV_NAME} python /app/src/main.py "$@"

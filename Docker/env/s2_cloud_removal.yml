@@ -3,14 +3,18 @@ channels:
   - pytorch
   - nvidia
   - conda-forge
+  - defaults
 dependencies:
   - python >=3.10,<4
   - matplotlib-base >=3.3,<4
   - numpy >=1.17.2,<2
   - pillow >=6.2,<10
   - pytorch>=2.0.0
-  - torchvision >=0.14.1
-  - pytorch-lightning >=2
+  - torchvision
+  - torchmetrics=1.2.0
+  - pytorch-lightning=2.1.1
+  - transformers<4.51.0
+  - segmentation-models-pytorch=0.4.0
   - rasterio >=1.0.20,<2
   - kornia=0.6.8
   - numba
@@ -18,7 +22,7 @@ dependencies:
   - torchinfo
   - wandb
   - scikit-learn
-  - scikit-image
+  - scikit-image>=0.22.0
   - pip
   - torchmetrics
   - tensorboard
@@ -28,6 +32,10 @@ dependencies:
   - ipykernel
   - jupyter
   - ipywidgets
+  - rich
+  - albumentations
+  - pandas
+  - geopandas
   - pip:
     - torchgeometry==0.1.2
     - prodict==0.8.18
